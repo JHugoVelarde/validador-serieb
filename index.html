@@ -22,7 +22,7 @@
 <body class="bg-slate-100 min-h-screen flex flex-col font-sans">
 
     <div id="view-selection" class="flex-grow flex flex-col items-center p-6 overflow-y-auto">
-        <h1 class="text-4xl font-black text-slate-800 mb-2 mt-4 text-center">Validador de Series</h1>
+        <h1 class="text-4xl font-black text-slate-800 mb-2 mt-4 text-center">Validador de Serie B</h1>
         <p class="text-slate-500 mb-6 text-center italic text-lg">Seleccione la denominación:</p>
         
         <div class="grid grid-cols-1 gap-3 w-full max-w-xs mb-8">
@@ -40,7 +40,7 @@
 
         <div class="mt-auto text-center pb-2">
             <button onclick="toggleModal(true)" class="text-slate-600 underline text-lg font-bold mb-2">Descargo de responsabilidad</button>
-            <p class="text-slate-500 font-medium text-lg">Made by Hugo Velarde - Fullstack Developer</p>
+            <p class="text-slate-500 font-medium text-lg">Made by Hugo Velarde - Fullstack Developer - Telf. 76075186</p>
         </div>
     </div>
 
@@ -76,7 +76,7 @@
 
         <div class="mt-auto text-center pt-6 pb-2 w-full">
             <button onclick="toggleModal(true)" class="text-slate-600 underline text-lg font-bold mb-2">Descargo de responsabilidad</button>
-            <p class="text-slate-500 font-medium text-lg">Made by Hugo Velarde - Fullstack Developer</p>
+            <p class="text-slate-500 font-medium text-lg">Made by Hugo Velarde - Fullstack Developer - Telf. 76075186</p>
         </div>
     </div>
 
@@ -84,10 +84,10 @@
         <div class="bg-white p-6 rounded-2xl max-w-sm shadow-2xl border-t-4 border-blue-600">
             <h3 class="font-bold text-2xl mb-4 text-slate-800">Aviso Legal</h3>
             <p class="text-lg text-gray-700 leading-relaxed mb-4">
-                Esta es una herramienta de <strong>ayuda social independiente</strong>. No es una aplicación oficial del Banco Central de Bolivia (BCB).
+                Este es un desarrollo <strong>independiente</strong>. No es una aplicación oficial del Banco Central de Bolivia (BCB).
             </p>
             <p class="text-lg text-gray-700 leading-relaxed">
-                El procesamiento se realiza localmente en su teléfono. Use la información solo como referencia preventiva.
+                La validación no siempre puede ser correcta o no estar de acuerdo a nueva información del BCB, uselo bajo su propio riesgo y solo como referencia preventiva.
             </p>
             <button onclick="toggleModal(false)" class="mt-8 w-full py-4 bg-blue-600 text-white rounded-xl text-xl font-bold">ENTENDIDO</button>
         </div>
@@ -182,7 +182,7 @@
                     const letra = coincidencia[2].toUpperCase();
                     validar(numeroSerie, letra);
                 } else {
-                    mostrarResultado("ERROR", "No se detectó una serie válida. Enfoque bien los 9 dígitos y la letra.", "gray");
+                    mostrarResultado("ERROR", "No se detectó una serie válida. Intente nuevamente.", "gray");
                 }
             } catch (e) {
                 alert("Error: " + e);
