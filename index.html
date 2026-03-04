@@ -31,11 +31,16 @@
             <button onclick="startScanner(50)" class="btn-denom bg-purple-700 text-white py-5 rounded-2xl shadow-lg text-3xl font-black border-purple-900">50 Bs.</button>
         </div>
 
-        <div class="w-full max-w-sm bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-            <h3 class="text-2xl font-bold text-slate-800 mb-3">Recomendaciones de uso:</h3>
+        <div class="w-full max-w-sm bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-8">
+            <h3 class="text-2xl font-bold text-slate-800 mb-3">Recomendaciones</h3>
             <p class="text-lg text-slate-700 leading-relaxed text-justify">
-                Coloque los 9 números y la letra dentro del recuadro rojo, no necesariamente deben estar centrados los números en el recuadro sino que solo el numero sea visible, evitar tomar captura de las letras pequeñas, evite sombras y reflejos sobre la serie, si el resultado da error aleje un poco el celular y vuelva a intentar.
+                Para evitar errores de captura asegúrese de tomar capturas nítidas y con buena luz, si no se capturó bien, le saldrá un aviso y puede intentar nuevamente.
             </p>
+        </div>
+
+        <div class="mt-auto text-center pb-2">
+            <button onclick="toggleModal(true)" class="text-slate-600 underline text-lg font-bold mb-2">Descargo de responsabilidad</button>
+            <p class="text-slate-500 font-medium text-lg">Made by Hugo Velarde - Fullstack Developer</p>
         </div>
     </div>
 
@@ -62,14 +67,17 @@
             <div class="bg-white/50 py-2 px-4 rounded-lg inline-block mb-6">
                 <span id="result-serie" class="text-3xl font-mono font-bold tracking-tighter"></span>
             </div>
-            <button onclick="resetScanner()" class="block w-full bg-slate-800 text-white py-4 rounded-xl font-bold shadow-lg text-xl mb-6">NUEVO ESCANEO</button>
-            
-            <button onclick="toggleModal(true)" class="text-slate-600 underline text-lg font-bold">Descargo de responsabilidad</button>
+            <button onclick="resetScanner()" class="block w-full bg-slate-800 text-white py-4 rounded-xl font-bold shadow-lg text-xl mb-2">NUEVO ESCANEO</button>
         </div>
 
         <button id="btn-capture" class="w-full max-w-md bg-blue-600 text-white py-5 rounded-2xl font-black text-2xl shadow-xl active:bg-blue-800 transition-colors">
             CAPTURAR SERIE
         </button>
+
+        <div class="mt-auto text-center pt-6 pb-2 w-full">
+            <button onclick="toggleModal(true)" class="text-slate-600 underline text-lg font-bold mb-2">Descargo de responsabilidad</button>
+            <p class="text-slate-500 font-medium text-lg">Made by Hugo Velarde - Fullstack Developer</p>
+        </div>
     </div>
 
     <div id="modal-legal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 z-50">
