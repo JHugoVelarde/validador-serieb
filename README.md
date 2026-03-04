@@ -1,4 +1,4 @@
-# Validador de Series de Billetes - BCB (No Oficial) 🇧🇴
+# Validador de Series de Billetes - Bolivia (No Oficial) 🇧🇴
 
 Esta es una Aplicación Web Progresiva (PWA) diseñada como una herramienta de ayuda social para la verificación rápida de series de billetes del Estado Plurinacional de Bolivia. Utiliza la cámara del dispositivo y reconocimiento óptico de caracteres (OCR) mediante Inteligencia Artificial para extraer el número de serie de un billete y compararlo contra una base de datos de series reportadas.
 
