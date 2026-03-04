@@ -7,65 +7,71 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src='https://unpkg.com/tesseract.js@v4.0.1/dist/tesseract.min.js'></script>
     <style>
-        .btn-denom { transition: all 0.2s; }
-        .btn-denom:active { transform: scale(0.95); }
+        .btn-denom { transition: all 0.2s; border-bottom-width: 4px; }
+        .btn-denom:active { transform: translateY(2px); border-bottom-width: 2px; }
         #video { width: 100%; height: auto; border-radius: 1rem; background: #000; }
-        /* Animación para el escáner */
         .scan-line {
             position: absolute; width: 100%; height: 2px;
-            background: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.5);
-            animation: scan 2s infinite;
+            background: #ff0000; opacity: 0.5;
+            box-shadow: 0 0 8px 1px #ff0000;
+            animation: scan 2s infinite linear;
         }
-        @keyframes scan {
-            0% { top: 0; }
-            50% { top: 100%; }
-            100% { top: 0; }
-        }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen flex flex-col font-sans">
 
-    <div id="view-selection" class="flex-grow flex flex-col items-center justify-center p-6">
-        <h1 class="text-3xl font-black text-slate-800 mb-2 text-center">Validador de Series</h1>
-        <p class="text-slate-500 mb-8 text-center italic">Seleccione la denominación del billete:</p>
+    <div id="view-selection" class="flex-grow flex flex-col items-center p-6 overflow-y-auto">
+        <h1 class="text-3xl font-black text-slate-800 mb-2 mt-4 text-center">Validador de Series</h1>
+        <p class="text-slate-500 mb-6 text-center italic text-sm">Seleccione la denominación:</p>
         
-        <div class="grid grid-cols-1 gap-4 w-full max-w-xs text-center">
-            <button onclick="startScanner(10)" class="btn-denom bg-blue-700 text-white py-6 rounded-2xl shadow-lg text-2xl font-bold border-b-4 border-blue-900">10 Bs.</button>
-            <button onclick="startScanner(20)" class="btn-denom bg-orange-600 text-white py-6 rounded-2xl shadow-lg text-2xl font-bold border-b-4 border-orange-800">20 Bs.</button>
-            <button onclick="startScanner(50)" class="btn-denom bg-purple-700 text-white py-6 rounded-2xl shadow-lg text-2xl font-bold border-b-4 border-purple-900">50 Bs.</button>
+        <div class="grid grid-cols-1 gap-3 w-full max-w-xs mb-8">
+            <button onclick="startScanner(10)" class="btn-denom bg-blue-700 text-white py-5 rounded-2xl shadow-lg text-xl font-bold border-blue-900">10 Bs.</button>
+            <button onclick="startScanner(20)" class="btn-denom bg-orange-600 text-white py-5 rounded-2xl shadow-lg text-xl font-bold border-orange-800">20 Bs.</button>
+            <button onclick="startScanner(50)" class="btn-denom bg-purple-700 text-white py-5 rounded-2xl shadow-lg text-xl font-bold border-purple-900">50 Bs.</button>
+        </div>
+
+        <div class="w-full max-w-sm bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+            <h3 class="font-bold text-slate-700 mb-3 flex items-center">
+                <span class="mr-2">💡</span> Recomendaciones de uso:
+            </h3>
+            <ul class="text-sm text-slate-600 space-y-3">
+                <li class="flex items-start">✅ <strong>Luz:</strong> Asegúrese de estar en un lugar bien iluminado sin reflejos sobre el billete.</li>
+                <li class="flex items-start">✅ <strong>Enfoque:</strong> Coloque el número de serie justo dentro del recuadro rojo.</li>
+                <li class="flex items-start">✅ <strong>Distancia:</strong> No acerque demasiado el celular; deje que la cámara enfoque bien los números.</li>
+                <li class="flex items-start">✅ <strong>Estabilidad:</strong> Mantenga el pulso firme al presionar el botón de capturar.</li>
+            </ul>
         </div>
     </div>
 
     <div id="view-scanner" class="hidden flex-grow flex flex-col items-center p-4">
         <div class="w-full max-w-md flex justify-between items-center mb-4">
-            <button onclick="location.reload()" class="text-blue-600 font-bold">← Volver</button>
-            <h2 id="denom-title" class="text-lg font-bold text-slate-700"></h2>
+            <button onclick="location.reload()" class="text-blue-600 font-bold">← Inicio</button>
+            <h2 id="denom-title" class="text-lg font-bold text-slate-700 bg-white px-3 py-1 rounded-full shadow-sm"></h2>
         </div>
 
-        <div id="camera-container" class="w-full max-w-md relative mb-4 overflow-hidden rounded-2xl shadow-xl">
+        <div id="camera-container" class="w-full max-w-md relative mb-4 overflow-hidden rounded-2xl shadow-xl border-2 border-white">
             <video id="video" autoplay playsinline></video>
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 h-20 border-4 border-white rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] pointer-events-none">
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 h-16 border-2 border-red-500 rounded shadow-[0_0_0_9999px_rgba(0,0,0,0.6)] pointer-events-none">
                 <div class="scan-line"></div>
             </div>
-            <p class="absolute bottom-4 left-0 w-full text-center text-white text-xs font-bold uppercase tracking-widest">Encuadre solo los números</p>
         </div>
 
         <div id="loading" class="hidden text-center p-8">
             <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mx-auto"></div>
-            <p class="mt-4 text-blue-800 font-bold italic">Procesando imagen con IA...</p>
+            <p class="mt-4 text-blue-800 font-bold italic">Analizando 9 dígitos...</p>
         </div>
 
         <div id="result" class="hidden w-full max-w-md p-8 rounded-3xl text-center shadow-2xl border-4">
-            <span id="result-status" class="text-5xl font-black block mb-4"></span>
-            <div class="bg-white/40 py-2 px-4 rounded-lg inline-block mb-6">
-                <span id="result-serie" class="text-xl font-mono tracking-widest"></span>
+            <span id="result-status" class="text-5xl font-black block mb-2"></span>
+            <div class="bg-white/50 py-2 px-4 rounded-lg inline-block mb-4">
+                <span id="result-serie" class="text-2xl font-mono font-bold tracking-tighter"></span>
             </div>
-            <button onclick="resetScanner()" class="block w-full bg-slate-800 text-white py-4 rounded-xl font-bold hover:bg-slate-700 transition-colors">INTENTAR DE NUEVO</button>
+            <button onclick="resetScanner()" class="block w-full bg-slate-800 text-white py-4 rounded-xl font-bold shadow-lg">NUEVO ESCANEO</button>
         </div>
 
         <button id="btn-capture" class="w-full max-w-md bg-blue-600 text-white py-5 rounded-2xl font-black text-xl shadow-xl active:bg-blue-800 transition-colors">
-            CAPTURAR Y VALIDAR
+            CAPTURAR SERIE
         </button>
     </div>
 
@@ -75,14 +81,14 @@
 
     <div id="modal-legal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 z-50">
         <div class="bg-white p-6 rounded-2xl max-w-sm shadow-2xl border-t-4 border-blue-600">
-            <h3 class="font-bold text-xl mb-4 text-slate-800">Aviso Importante</h3>
+            <h3 class="font-bold text-xl mb-4 text-slate-800">Aviso Legal</h3>
             <p class="text-sm text-gray-600 leading-relaxed mb-4">
-                Esta aplicación es una <strong>herramienta de ayuda social independiente</strong>. No tiene vinculación oficial con el Banco Central de Bolivia (BCB).
+                Esta es una herramienta de <strong>ayuda social independiente</strong>. No es una aplicación oficial del Banco Central de Bolivia (BCB).
             </p>
             <p class="text-sm text-gray-600 leading-relaxed">
-                El reconocimiento de texto (OCR) puede fallar por falta de luz o mala calidad de la cámara. La información de series se basa en reportes públicos. Use el resultado solo como referencia.
+                El procesamiento se realiza localmente en su teléfono. La precisión depende de la calidad de su cámara y la iluminación. Use la información con precaución.
             </p>
-            <button onclick="toggleModal(false)" class="mt-8 w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg">HE LEÍDO Y ACEPTO</button>
+            <button onclick="toggleModal(false)" class="mt-8 w-full py-4 bg-blue-600 text-white rounded-xl font-bold">ENTENDIDO</button>
         </div>
     </div>
 
@@ -93,19 +99,11 @@
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
 
-        // BASE DE DATOS DE RANGOS (Completa con tus datos)
+        // BASE DE DATOS (Se comparan como números internamente para los rangos)
         const database = {
-            10: [
-                {del: 77100001, al: 77550000},
-                {del: 78000001, al: 78450000}
-            ],
-            20: [
-                {del: 67250001, al: 67700000}
-            ],
-            50: [
-                {del: 76310012, al: 85139995},
-                {del: 87280145, al: 91646549}
-            ]
+            10: [{del: 77100001, al: 77550000}, {del: 78000001, al: 78450000}],
+            20: [{del: 67250001, al: 67700000}],
+            50: [{del: 76310012, al: 85139995}, {del: 87280145, al: 91646549}]
         };
 
         async function startScanner(denom) {
@@ -120,7 +118,7 @@
                 });
                 video.srcObject = stream;
             } catch (err) {
-                alert("Se requieren permisos de cámara para funcionar.");
+                alert("Permiso de cámara denegado.");
                 location.reload();
             }
         }
@@ -134,72 +132,64 @@
             loading.classList.remove('hidden');
 
             const ctx = canvas.getContext('2d');
-            
-            // Lógica de recorte: Capturamos solo el centro del video
             const vW = video.videoWidth;
             const vH = video.videoHeight;
             
-            // Definimos el área del recuadro (80% ancho, 120px alto aprox)
+            // Recorte preciso del centro
             const cropW = vW * 0.8;
-            const cropH = vH * 0.2;
+            const cropH = vH * 0.15;
             const cropX = (vW - cropW) / 2;
             const cropY = (vH - cropH) / 2;
 
             canvas.width = cropW;
             canvas.height = cropH;
-
-            // Dibujar recorte en el canvas
             ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
 
             try {
-                // OCR con Tesseract optimizado
                 const worker = await Tesseract.createWorker();
                 await worker.loadLanguage('eng');
                 await worker.initialize('eng');
-                await worker.setParameters({
-                    tessedit_char_whitelist: '0123456789', // SOLO busca números
-                });
+                await worker.setParameters({ tessedit_char_whitelist: '0123456789' });
 
                 const { data: { text } } = await worker.recognize(canvas);
                 await worker.terminate();
 
-                const serieLimpia = text.replace(/\D/g, ""); // Eliminar cualquier cosa que no sea dígito
-                const serieNum = parseInt(serieLimpia);
+                // TOMAR SOLO LOS PRIMEROS 9 DÍGITOS
+                let serieExtraida = text.replace(/\D/g, "").substring(0, 9);
 
                 loading.classList.add('hidden');
                 camContainer.classList.add('hidden'); 
                 
-                if (!isNaN(serieNum) && serieLimpia.length >= 6) { 
-                    validar(serieNum);
+                if (serieExtraida.length >= 7) { // Permitimos 7 o más para mayor flexibilidad
+                    validar(serieExtraida);
                 } else {
-                    mostrarResultado("ERROR", "No se detectó el número. Intente más cerca.", "gray");
+                    mostrarResultado("ERROR", "No se leyó bien", "gray");
                 }
             } catch (e) {
-                alert("Error al procesar: " + e);
+                alert("Error: " + e);
                 resetScanner();
             }
         };
 
-        function validar(num) {
+        function validar(serieStr) {
+            const num = parseInt(serieStr);
             const rangos = database[currentDenom];
             const esInvalido = rangos.some(r => num >= r.del && num <= r.al);
             
             if (esInvalido) {
-                mostrarResultado("INVÁLIDO", `SERIE: ${num}`, "red");
+                mostrarResultado("INVÁLIDO", serieStr, "red");
             } else {
-                mostrarResultado("VÁLIDO", `SERIE: ${num}`, "green");
+                mostrarResultado("VÁLIDO", serieStr, "green");
             }
         }
 
         function mostrarResultado(status, serie, color) {
             const res = document.getElementById('result');
-            // Mapeo de colores de Tailwind
             const styles = {
                 red: "bg-red-50 border-red-500 text-red-800",
                 green: "bg-green-50 border-green-500 text-green-800",
                 gray: "bg-slate-50 border-slate-500 text-slate-800"
             };
-            
             res.className = `w-full max-w-md p-8 rounded-3xl text-center shadow-2xl border-4 ${styles[color]}`;
             document.getElementById('result-status').innerText = status;
             document.getElementById('result-serie').innerText = serie;
@@ -210,7 +200,6 @@
             document.getElementById('result').classList.add('hidden');
             document.getElementById('camera-container').classList.remove('hidden');
             document.getElementById('btn-capture').classList.remove('hidden');
-            document.getElementById('loading').classList.add('hidden');
         }
 
         function toggleModal(show) {
