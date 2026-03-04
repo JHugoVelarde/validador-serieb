@@ -26,9 +26,9 @@
         <p class="text-slate-500 mb-6 text-center italic text-sm">Seleccione la denominación:</p>
         
         <div class="grid grid-cols-1 gap-3 w-full max-w-xs mb-8">
-            <button onclick="startScanner(10)" class="btn-denom bg-blue-700 text-white py-5 rounded-2xl shadow-lg text-xl font-bold border-blue-900">10 Bs.</button>
-            <button onclick="startScanner(20)" class="btn-denom bg-orange-600 text-white py-5 rounded-2xl shadow-lg text-xl font-bold border-orange-800">20 Bs.</button>
-            <button onclick="startScanner(50)" class="btn-denom bg-purple-700 text-white py-5 rounded-2xl shadow-lg text-xl font-bold border-purple-900">50 Bs.</button>
+            <button onclick="startScanner(10)" class="btn-denom bg-blue-700 text-white py-5 rounded-2xl shadow-lg text-xl font-bold border-blue-900">10 Bs. (Azul)</button>
+            <button onclick="startScanner(20)" class="btn-denom bg-orange-600 text-white py-5 rounded-2xl shadow-lg text-xl font-bold border-orange-800">20 Bs. (Naranja)</button>
+            <button onclick="startScanner(50)" class="btn-denom bg-purple-700 text-white py-5 rounded-2xl shadow-lg text-xl font-bold border-purple-900">50 Bs. (Lila)</button>
         </div>
 
         <div class="w-full max-w-sm bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
@@ -36,10 +36,9 @@
                 <span class="mr-2">💡</span> Recomendaciones de uso:
             </h3>
             <ul class="text-sm text-slate-600 space-y-3">
-                <li class="flex items-start">✅ <strong>Luz:</strong> Asegúrese de estar en un lugar bien iluminado sin reflejos sobre el billete.</li>
-                <li class="flex items-start">✅ <strong>Enfoque:</strong> Coloque el número de serie justo dentro del recuadro rojo.</li>
-                <li class="flex items-start">✅ <strong>Distancia:</strong> No acerque demasiado el celular; deje que la cámara enfoque bien los números.</li>
-                <li class="flex items-start">✅ <strong>Estabilidad:</strong> Mantenga el pulso firme al presionar el botón de capturar.</li>
+                <li class="flex items-start">✅ <strong>Enfoque:</strong> Coloque <strong>los 9 números y la letra (A o B)</strong> dentro del recuadro rojo.</li>
+                <li class="flex items-start">✅ <strong>Luz:</strong> Evite sombras y reflejos sobre la serie.</li>
+                <li class="flex items-start">✅ <strong>Distancia:</strong> Si el resultado da error, aleje un poco el celular y vuelva a intentar.</li>
             </ul>
         </div>
     </div>
@@ -52,17 +51,17 @@
 
         <div id="camera-container" class="w-full max-w-md relative mb-4 overflow-hidden rounded-2xl shadow-xl border-2 border-white">
             <video id="video" autoplay playsinline></video>
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 h-16 border-2 border-red-500 rounded shadow-[0_0_0_9999px_rgba(0,0,0,0.6)] pointer-events-none">
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-11/12 h-16 border-2 border-red-500 rounded shadow-[0_0_0_9999px_rgba(0,0,0,0.6)] pointer-events-none">
                 <div class="scan-line"></div>
             </div>
         </div>
 
         <div id="loading" class="hidden text-center p-8">
             <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mx-auto"></div>
-            <p class="mt-4 text-blue-800 font-bold italic">Analizando 9 dígitos...</p>
+            <p class="mt-4 text-blue-800 font-bold italic">Buscando patrón (9 dígitos + Letra)...</p>
         </div>
 
-        <div id="result" class="hidden w-full max-w-md p-8 rounded-3xl text-center shadow-2xl border-4">
+        <div id="result" class="hidden w-full max-w-md p-6 rounded-3xl text-center shadow-2xl border-4">
             <span id="result-status" class="text-5xl font-black block mb-2"></span>
             <div class="bg-white/50 py-2 px-4 rounded-lg inline-block mb-4">
                 <span id="result-serie" class="text-2xl font-mono font-bold tracking-tighter"></span>
@@ -86,7 +85,7 @@
                 Esta es una herramienta de <strong>ayuda social independiente</strong>. No es una aplicación oficial del Banco Central de Bolivia (BCB).
             </p>
             <p class="text-sm text-gray-600 leading-relaxed">
-                El procesamiento se realiza localmente en su teléfono. La precisión depende de la calidad de su cámara y la iluminación. Use la información con precaución.
+                El procesamiento se realiza localmente en su teléfono. Use la información solo como referencia preventiva.
             </p>
             <button onclick="toggleModal(false)" class="mt-8 w-full py-4 bg-blue-600 text-white rounded-xl font-bold">ENTENDIDO</button>
         </div>
@@ -99,11 +98,28 @@
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
 
-        // BASE DE DATOS (Se comparan como números internamente para los rangos)
+        // BASE DE DATOS COMPLETA EXTRAÍDA DE TUS IMÁGENES
         const database = {
-            10: [{del: 77100001, al: 77550000}, {del: 78000001, al: 78450000}],
-            20: [{del: 67250001, al: 67700000}],
-            50: [{del: 76310012, al: 85139995}, {del: 87280145, al: 91646549}]
+            10: [
+                {del: 77100001, al: 77550000}, {del: 78000001, al: 78450000}, {del: 78900001, al: 96350000},
+                {del: 96350001, al: 96800000}, {del: 96800001, al: 97250000}, {del: 98150001, al: 98600000},
+                {del: 104900001, al: 105350000}, {del: 105350001, al: 105800000}, {del: 106700001, al: 107150000},
+                {del: 107600001, al: 108050000}, {del: 108050001, al: 108500000}, {del: 109400001, al: 109850000}
+            ],
+            20: [
+                {del: 87280145, al: 91646549}, {del: 96650001, al: 97100000}, {del: 99800001, al: 100250000},
+                {del: 100250001, al: 100700000}, {del: 109250001, al: 109700000}, {del: 110600001, al: 111050000},
+                {del: 111050001, al: 111500000}, {del: 111950001, al: 112400000}, {del: 112400001, al: 112850000},
+                {del: 112850001, al: 113300000}, {del: 114200001, al: 114650000}, {del: 114650001, al: 115100000},
+                {del: 115100001, al: 115550000}, {del: 118700001, al: 119150000}, {del: 119150001, al: 119600000},
+                {del: 120500001, al: 120950000}
+            ],
+            50: [
+                {del: 67250001, al: 67700000}, {del: 69050001, al: 69500000}, {del: 69500001, al: 69950000},
+                {del: 69950001, al: 70400000}, {del: 70400001, al: 70850000}, {del: 70850001, al: 71300000},
+                {del: 76310012, al: 85139995}, {del: 86400001, al: 86850000}, {del: 90900001, al: 91350000},
+                {del: 91800001, al: 92250000}
+            ]
         };
 
         async function startScanner(denom) {
@@ -135,8 +151,8 @@
             const vW = video.videoWidth;
             const vH = video.videoHeight;
             
-            // Recorte preciso del centro
-            const cropW = vW * 0.8;
+            // Recorte: más ancho (90%) para asegurar que la letra ingrese
+            const cropW = vW * 0.9;
             const cropH = vH * 0.15;
             const cropX = (vW - cropW) / 2;
             const cropY = (vH - cropH) / 2;
@@ -149,21 +165,25 @@
                 const worker = await Tesseract.createWorker();
                 await worker.loadLanguage('eng');
                 await worker.initialize('eng');
-                await worker.setParameters({ tessedit_char_whitelist: '0123456789' });
+                // Ahora permitimos números, las letras A y B, y espacios
+                await worker.setParameters({ tessedit_char_whitelist: '0123456789AB ' });
 
                 const { data: { text } } = await worker.recognize(canvas);
                 await worker.terminate();
 
-                // TOMAR SOLO LOS PRIMEROS 9 DÍGITOS
-                let serieExtraida = text.replace(/\D/g, "").substring(0, 9);
-
                 loading.classList.add('hidden');
                 camContainer.classList.add('hidden'); 
-                
-                if (serieExtraida.length >= 7) { // Permitimos 7 o más para mayor flexibilidad
-                    validar(serieExtraida);
+
+                // MAGIA: Buscar exactamente 9 números, seguidos opcionalmente de espacio, y una A o B
+                const patron = /(\d{9})\s*([AB])/i; 
+                const coincidencia = text.match(patron);
+
+                if (coincidencia) {
+                    const numeroSerie = coincidencia[1];
+                    const letra = coincidencia[2].toUpperCase();
+                    validar(numeroSerie, letra);
                 } else {
-                    mostrarResultado("ERROR", "No se leyó bien", "gray");
+                    mostrarResultado("ERROR", "No se detectó una serie válida. Enfoque bien los 9 dígitos y la letra.", "gray");
                 }
             } catch (e) {
                 alert("Error: " + e);
@@ -171,15 +191,24 @@
             }
         };
 
-        function validar(serieStr) {
-            const num = parseInt(serieStr);
+        function validar(serieStr, letra) {
+            const serieMostrada = `${serieStr} ${letra}`;
+
+            // Lógica principal: Si es A, siempre es Válido.
+            if (letra === 'A') {
+                mostrarResultado("VÁLIDO", serieMostrada, "green");
+                return;
+            }
+
+            // Si es B, verificamos el rango
+            const num = parseInt(serieStr, 10);
             const rangos = database[currentDenom];
             const esInvalido = rangos.some(r => num >= r.del && num <= r.al);
             
             if (esInvalido) {
-                mostrarResultado("INVÁLIDO", serieStr, "red");
+                mostrarResultado("INVÁLIDO", serieMostrada, "red");
             } else {
-                mostrarResultado("VÁLIDO", serieStr, "green");
+                mostrarResultado("VÁLIDO", serieMostrada, "green");
             }
         }
 
@@ -190,7 +219,7 @@
                 green: "bg-green-50 border-green-500 text-green-800",
                 gray: "bg-slate-50 border-slate-500 text-slate-800"
             };
-            res.className = `w-full max-w-md p-8 rounded-3xl text-center shadow-2xl border-4 ${styles[color]}`;
+            res.className = `w-full max-w-md p-6 rounded-3xl text-center shadow-2xl border-4 ${styles[color]}`;
             document.getElementById('result-status').innerText = status;
             document.getElementById('result-serie').innerText = serie;
             res.classList.remove('hidden');
