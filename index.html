@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Validador de Billetes Bolivia</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1d4ed8">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src='https://unpkg.com/tesseract.js@v4.0.1/dist/tesseract.min.js'></script>
     <style>
@@ -38,6 +40,10 @@
             </p>
         </div>
 
+        <button id="btn-install" class="hidden mb-6 text-blue-700 font-bold underline text-lg flex items-center justify-center w-full">
+            📲 Instalar App en tu celular
+        </button>
+        
         <div class="mt-auto text-center pb-2">
             <button onclick="toggleModal(true)" class="text-slate-600 underline text-lg font-bold mb-2">Descargo de responsabilidad</button>
             <p class="text-slate-500 font-medium text-lg">Made by Hugo Velarde - Fullstack Developer - Telf. 76075186</p>
@@ -232,6 +238,44 @@
         function toggleModal(show) {
             document.getElementById('modal-legal').classList.toggle('hidden', !show);
         }
+
+        // --- LÓGICA DE PWA ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker registrado'))
+                    .catch(err => console.log('Error en Service Worker', err));
+            });
+        }
+
+        let deferredPrompt;
+        const btnInstall = document.getElementById('btn-install');
+
+        // Captura el evento de instalación de Chrome/Android
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Mostramos el botón
+            btnInstall.classList.remove('hidden');
+        });
+
+        btnInstall.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('El usuario instaló la app');
+                }
+                deferredPrompt = null;
+                btnInstall.classList.add('hidden');
+            }
+        });
+
+        // Ocultar botón si ya se instaló
+        window.addEventListener('appinstalled', () => {
+            btnInstall.classList.add('hidden');
+            deferredPrompt = null;
+        });
     </script>
 </body>
 </html>
