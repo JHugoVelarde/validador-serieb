@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validador de Billetes BCB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src='https://unpkg.com/tesseract.js@v4.0.1/dist/tesseract.min.js'></script>
+    <style>
+        #video { width: 100%; max-width: 500px; border-radius: 15px; }
+        .scanner-container { position: relative; }
+        .overlay { 
+            position: absolute; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%);
+            border: 2px solid rgba(255,255,255,0.7);
+            width: 80%; height: 60px; pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+
+    <header class="text-center my-6">
+        <h1 class="text-2xl font-bold text-blue-800">Validador de Series</h1>
+        <p class="text-gray-600">Banco Central de Bolivia</p>
+    </header>
+
+    <div class="scanner-container bg-black rounded-xl overflow-hidden shadow-xl">
+        <video id="video" autoplay playsinline></video>
+        <div class="overlay"></div>
+    </div>
+
+    <div class="mt-6 w-full max-w-md">
+        <button id="btn-scan" class="w-full bg-blue-600 text-white font-bold py-4 rounded-lg shadow-lg active:scale-95 transition-transform">
+            ESCANEAR SERIE
+        </button>
+        
+        <div id="loading" class="hidden text-center mt-4 italic text-blue-600 animate-pulse">
+            Procesando imagen...
+        </div>
+
+        <div id="result" class="mt-6 p-6 rounded-xl text-center hidden">
+            <span id="result-text" class="text-3xl font-black block"></span>
+            <span id="serie-detectada" class="text-sm mt-2 block opacity-80"></span>
+        </div>
+    </div>
+
+    <canvas id="canvas" class="hidden"></canvas>
+
+    <script>
+        const video = document.getElementById('video');
+        const btnScan = document.getElementById('btn-scan');
+        const resultDiv = document.getElementById('result');
+        const resultText = document.getElementById('result-text');
+        const serieDetectada = document.getElementById('serie-detectada');
+        const loading = document.getElementById('loading');
+        const canvas = document.getElementById('canvas');
+
+        // Algunos rangos extraídos de tus imágenes (puedes agregar todos los de la lista)
+        const rangosInvalidados = [
+            { del: 77100001, al: 77550000 },
+            { del: 78000001, al: 78450000 },
+            { del: 87280145, al: 91646549 },
+            { del: 67250001, al: 67700000 },
+            { del: 76310012, al: 85139995 }
+            // Agrega aquí el resto de los pares de tus imágenes
+        ];
+
+        // Iniciar cámara
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+            .then(stream => { video.srcObject = stream; })
+            .catch(err => alert("Error al acceder a la cámara: " + err));
+
+        btnScan.onclick = async () => {
+            loading.classList.remove('hidden');
+            resultDiv.classList.add('hidden');
+
+            // Capturar frame
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // OCR con Tesseract
+            const { data: { text } } = await Tesseract.recognize(canvas, 'eng');
+            
+            // Limpiar texto: buscar solo los números
+            const numeroEncontrado = text.replace(/\D/g, "");
+            const serieNum = parseInt(numeroEncontrado);
+
+            if (!isNaN(serieNum)) {
+                validarSerie(serieNum);
+            } else {
+                mostrarResultado("ERROR", "No se detectó número", "gray");
+            }
+            loading.classList.add('hidden');
+        };
+
+        function validarSerie(num) {
+            const esInvalido = rangosInvalidados.some(r => num >= r.del && num <= r.al);
+            
+            if (esInvalido) {
+                mostrarResultado("INVALIDO", `Serie: ${num}`, "red");
+            } else {
+                mostrarResultado("VALIDO", `Serie: ${num}`, "green");
+            }
+        }
+
+        function mostrarResultado(titulo, detalle, color) {
+            resultDiv.className = `mt-6 p-6 rounded-xl text-center bg-${color}-100 text-${color}-800 border-2 border-${color}-500`;
+            resultText.innerText = titulo;
+            serieDetectada.innerText = detalle;
+            resultDiv.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
