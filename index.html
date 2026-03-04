@@ -3,113 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Validador de Billetes BCB</title>
+    <title>Validador de Billetes Bolivia</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src='https://unpkg.com/tesseract.js@v4.0.1/dist/tesseract.min.js'></script>
     <style>
-        #video { width: 100%; max-width: 500px; border-radius: 15px; }
-        .scanner-container { position: relative; }
-        .overlay { 
-            position: absolute; top: 50%; left: 50%; 
-            transform: translate(-50%, -50%);
-            border: 2px solid rgba(255,255,255,0.7);
-            width: 80%; height: 60px; pointer-events: none;
-        }
+        .btn-denom { transition: all 0.2s; }
+        .btn-denom:active { transform: scale(0.95); }
+        #video { width: 100%; border-radius: 1rem; background: #000; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+<body class="bg-slate-50 min-h-screen flex flex-col font-sans">
 
-    <header class="text-center my-6">
-        <h1 class="text-2xl font-bold text-blue-800">Validador de Series</h1>
-        <p class="text-gray-600">Banco Central de Bolivia</p>
-    </header>
-
-    <div class="scanner-container bg-black rounded-xl overflow-hidden shadow-xl">
-        <video id="video" autoplay playsinline></video>
-        <div class="overlay"></div>
+    <div id="view-selection" class="flex-grow flex flex-col items-center justify-center p-6">
+        <h1 class="text-3xl font-black text-slate-800 mb-2 text-center">Validador de Series</h1>
+        <p class="text-slate-500 mb-8 text-center italic">Seleccione la denominación del billete:</p>
+        
+        <div class="grid grid-cols-1 gap-4 w-full max-w-xs">
+            <button onclick="startScanner(10)" class="btn-denom bg-blue-600 text-white py-6 rounded-2xl shadow-lg text-2xl font-bold">10 Bolivianos</button>
+            <button onclick="startScanner(20)" class="btn-denom bg-orange-500 text-white py-6 rounded-2xl shadow-lg text-2xl font-bold">20 Bolivianos</button>
+            <button onclick="startScanner(50)" class="btn-denom bg-purple-600 text-white py-6 rounded-2xl shadow-lg text-2xl font-bold">50 Bolivianos</button>
+        </div>
     </div>
 
-    <div class="mt-6 w-full max-w-md">
-        <button id="btn-scan" class="w-full bg-blue-600 text-white font-bold py-4 rounded-lg shadow-lg active:scale-95 transition-transform">
-            ESCANEAR SERIE
-        </button>
+    <div id="view-scanner" class="hidden flex-grow flex flex-col items-center p-4">
+        <button onclick="location.reload()" class="self-start text-blue-600 font-bold mb-4">← Volver</button>
         
-        <div id="loading" class="hidden text-center mt-4 italic text-blue-600 animate-pulse">
-            Procesando imagen...
+        <h2 id="denom-title" class="text-xl font-bold mb-4">Escaneando billete de --</h2>
+
+        <div id="camera-container" class="w-full max-w-md relative mb-4">
+            <video id="video" autoplay playsinline></video>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 h-16 border-2 border-dashed border-white opacity-60 pointer-events-none"></div>
         </div>
 
-        <div id="result" class="mt-6 p-6 rounded-xl text-center hidden">
-            <span id="result-text" class="text-3xl font-black block"></span>
-            <span id="serie-detectada" class="text-sm mt-2 block opacity-80"></span>
+        <div id="loading" class="hidden text-center p-4">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto"></div>
+            <p class="mt-2 text-blue-600 font-medium">Procesando serie...</p>
+        </div>
+
+        <div id="result" class="hidden w-full max-w-md p-8 rounded-3xl text-center shadow-2xl border-4">
+            <span id="result-status" class="text-4xl font-black block mb-2"></span>
+            <span id="result-serie" class="text-lg font-mono bg-white/50 rounded px-2"></span>
+            <button onclick="resetScanner()" class="mt-6 block w-full bg-slate-800 text-white py-3 rounded-xl font-bold">Escanear otro</button>
+        </div>
+
+        <button id="btn-capture" class="w-full max-w-md bg-blue-600 text-white py-5 rounded-2xl font-black text-xl shadow-xl mt-4">
+            ESCANEAR SERIE
+        </button>
+    </div>
+
+    <footer class="p-6 text-center">
+        <a href="#" onclick="toggleModal(true)" class="text-slate-400 underline text-sm">Descargo de responsabilidad</a>
+    </footer>
+
+    <div id="modal-legal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6 z-50">
+        <div class="bg-white p-6 rounded-2xl max-w-sm shadow-2xl">
+            <h3 class="font-bold text-lg mb-3">Aviso Legal</h3>
+            <p class="text-sm text-gray-600 leading-relaxed">
+                Esta es una herramienta de <strong>ayuda social independiente</strong> y NO es una aplicación oficial del Banco Central de Bolivia (BCB). 
+                <br><br>
+                El propósito es orientar sobre billetes reportados como inválidos. La verificación puede no ser 100% exacta debido a condiciones de luz o cambios en la base de datos oficial. Use esta información solo como referencia.
+            </p>
+            <button onclick="toggleModal(false)" class="mt-6 w-full py-2 bg-blue-600 text-white rounded-lg font-bold">Entendido</button>
         </div>
     </div>
 
     <canvas id="canvas" class="hidden"></canvas>
 
     <script>
-        const video = document.getElementById('video');
-        const btnScan = document.getElementById('btn-scan');
-        const resultDiv = document.getElementById('result');
-        const resultText = document.getElementById('result-text');
-        const serieDetectada = document.getElementById('serie-detectada');
-        const loading = document.getElementById('loading');
-        const canvas = document.getElementById('canvas');
-
-        // Algunos rangos extraídos de tus imágenes (puedes agregar todos los de la lista)
-        const rangosInvalidados = [
-            { del: 77100001, al: 77550000 },
-            { del: 78000001, al: 78450000 },
-            { del: 87280145, al: 91646549 },
-            { del: 67250001, al: 67700000 },
-            { del: 76310012, al: 85139995 }
-            // Agrega aquí el resto de los pares de tus imágenes
-        ];
-
-        // Iniciar cámara
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-            .then(stream => { video.srcObject = stream; })
-            .catch(err => alert("Error al acceder a la cámara: " + err));
-
-        btnScan.onclick = async () => {
-            loading.classList.remove('hidden');
-            resultDiv.classList.add('hidden');
-
-            // Capturar frame
-            const context = canvas.getContext('2d');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            // OCR con Tesseract
-            const { data: { text } } = await Tesseract.recognize(canvas, 'eng');
-            
-            // Limpiar texto: buscar solo los números
-            const numeroEncontrado = text.replace(/\D/g, "");
-            const serieNum = parseInt(numeroEncontrado);
-
-            if (!isNaN(serieNum)) {
-                validarSerie(serieNum);
-            } else {
-                mostrarResultado("ERROR", "No se detectó número", "gray");
-            }
-            loading.classList.add('hidden');
+        let currentDenom = 0;
+        const database = {
+            10: [{del: 77100001, al: 77550000}, {del: 78000001, al: 78450000}], // Añade más aquí
+            20: [{del: 67250001, al: 67700000}],
+            50: [{del: 76310012, al: 85139995}]
         };
 
-        function validarSerie(num) {
-            const esInvalido = rangosInvalidados.some(r => num >= r.del && num <= r.al);
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+
+        function startScanner(denom) {
+            currentDenom = denom;
+            document.getElementById('view-selection').classList.add('hidden');
+            document.getElementById('view-scanner').classList.remove('hidden');
+            document.getElementById('denom-title').innerText = `Billete de ${denom} Bs.`;
+            
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                .then(stream => { video.srcObject = stream; })
+                .catch(err => alert("Activa la cámara para continuar."));
+        }
+
+        document.getElementById('btn-capture').onclick = async () => {
+            const btn = document.getElementById('btn-capture');
+            const loading = document.getElementById('loading');
+            const camContainer = document.getElementById('camera-container');
+            
+            btn.classList.add('hidden');
+            loading.classList.remove('hidden');
+
+            // Capturar
+            const ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+
+            // OCR
+            const { data: { text } } = await Tesseract.recognize(canvas, 'eng');
+            const serieNum = parseInt(text.replace(/\D/g, ""));
+
+            loading.classList.add('hidden');
+            camContainer.classList.add('hidden'); // OCULTA LA CÁMARA
+            
+            if (!isNaN(serieNum)) {
+                validar(serieNum);
+            } else {
+                mostrarResultado("ERROR", "No se leyó bien", "gray");
+            }
+        };
+
+        function validar(num) {
+            const rangos = database[currentDenom];
+            const esInvalido = rangos.some(r => num >= r.del && num <= r.al);
             
             if (esInvalido) {
-                mostrarResultado("INVALIDO", `Serie: ${num}`, "red");
+                mostrarResultado("INVÁLIDO", `Serie detectada: ${num}`, "red");
             } else {
-                mostrarResultado("VALIDO", `Serie: ${num}`, "green");
+                mostrarResultado("VÁLIDO", `Serie detectada: ${num}`, "green");
             }
         }
 
-        function mostrarResultado(titulo, detalle, color) {
-            resultDiv.className = `mt-6 p-6 rounded-xl text-center bg-${color}-100 text-${color}-800 border-2 border-${color}-500`;
-            resultText.innerText = titulo;
-            serieDetectada.innerText = detalle;
-            resultDiv.classList.remove('hidden');
+        function mostrarResultado(status, serie, color) {
+            const res = document.getElementById('result');
+            res.className = `w-full max-w-md p-8 rounded-3xl text-center shadow-2xl border-4 bg-${color}-50 border-${color}-500 text-${color}-800`;
+            document.getElementById('result-status').innerText = status;
+            document.getElementById('result-serie').innerText = serie;
+            res.classList.remove('hidden');
+        }
+
+        function resetScanner() {
+            document.getElementById('result').classList.add('hidden');
+            document.getElementById('camera-container').classList.remove('hidden');
+            document.getElementById('btn-capture').classList.remove('hidden');
+        }
+
+        function toggleModal(show) {
+            document.getElementById('modal-legal').classList.toggle('hidden', !show);
         }
     </script>
 </body>
